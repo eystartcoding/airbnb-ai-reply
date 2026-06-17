@@ -2,8 +2,17 @@
 
 import { useState } from "react";
 
+const TONES = [
+  { value: "friendly", label: "Friendly" },
+  { value: "professional", label: "Professional" },
+  { value: "firm", label: "Firm" },
+] as const;
+
+type Tone = (typeof TONES)[number]["value"];
+
 export default function GuestReplyForm() {
   const [message, setMessage] = useState("");
+  const [tone, setTone] = useState<Tone>("friendly");
   const [reply, setReply] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -22,7 +31,7 @@ export default function GuestReplyForm() {
       const response = await fetch("/api/generate-reply", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: message.trim() }),
+        body: JSON.stringify({ message: message.trim(), tone }),
       });
 
       const data = await response.json();
@@ -54,6 +63,28 @@ export default function GuestReplyForm() {
           className="w-full resize-none rounded-lg border border-zinc-200 bg-white px-4 py-3 text-zinc-900 placeholder:text-zinc-400 outline-none transition focus:border-zinc-400 focus:ring-2 focus:ring-zinc-100"
         />
       </div>
+
+      <fieldset className="space-y-3">
+        <legend className="text-sm font-medium text-zinc-700">Select tone</legend>
+        <div className="flex flex-wrap gap-6">
+          {TONES.map((option) => (
+            <label
+              key={option.value}
+              className="flex cursor-pointer items-center gap-2 text-sm text-zinc-700"
+            >
+              <input
+                type="radio"
+                name="tone"
+                value={option.value}
+                checked={tone === option.value}
+                onChange={() => setTone(option.value)}
+                className="h-4 w-4 border-zinc-300 text-zinc-900 focus:ring-zinc-400"
+              />
+              {option.label}
+            </label>
+          ))}
+        </div>
+      </fieldset>
 
       <button
         type="button"
